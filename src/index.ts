@@ -1,30 +1,38 @@
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import { AppDataSource } from './config/database';
+import { errorHandler } from './libraries/error-handler';
+import logger from './libraries/logger';
+import userRoutes from './components/users/entry-points/api/user.routes';
 
-// Load environment variables
 dotenv.config();
 
-// Create Express app
 const app = express();
 
-// Apply middlewares
 app.use(helmet());
 app.use(cors());
 app.use(compression());
 app.use(express.json());
 
-// Basic route
-app.get('/', (req, res) => {
-  res.json({ message: 'NodeJS-ExpressJS Best Practices API' });
-});
+app.use('/api/users', userRoutes);
+app.use(errorHandler);
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Database initialization
+AppDataSource.initialize()
+    .then(() => {
+        logger.info('Database has been initialized!');
+        
+        const PORT = process.env.PORT || 3000;
+        app.listen(PORT, () => {
+            logger.info(`Server is running on port ${PORT}`);
+        });
+    })
+    .catch((error) => {
+        logger.error('Error during Data Source initialization:', error);
+    });
 
 export default app;
