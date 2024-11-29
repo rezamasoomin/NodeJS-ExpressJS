@@ -6,10 +6,12 @@ import { authLimiter } from '../../../../libraries/rate-limiter';
 import { sanitizeInput } from '../../../../libraries/sanitization';
 import { validateDto } from '../../../../libraries/validation';
 import { LoginDto } from '../../domain/dtos/auth.dto';
+import { validateLogin } from './auth.validation';
+import { DataSource } from 'typeorm';
 
-export const createAuthRouter = () => {
+export const createAuthRouter = (dataSource: DataSource) => {
     const router = Router();
-    const userRepository = new UserRepository();
+    const userRepository = new UserRepository(dataSource);
     const authService = new AuthService(userRepository);
     const authController = new AuthController(authService);
 

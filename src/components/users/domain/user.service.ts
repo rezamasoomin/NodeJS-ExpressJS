@@ -4,7 +4,7 @@ import { AppError } from '../../../libraries/error-handler';
 import logger from '../../../libraries/logger';
 
 export class UserService {
-  constructor(private userRepository: IUserRepository) {}
+  constructor(private userRepository: IUserRepository) { }
 
   async createUser(userData: User): Promise<UserDTO> {
     const existingUser = await this.userRepository.findByEmail(userData.email);
@@ -35,13 +35,23 @@ export class UserService {
 
   async updateUser(id: string, updateData: Partial<User>): Promise<UserDTO> {
     try {
-      // Remove sensitive fields from update data
-      const { password, ...safeUpdateData } = updateData;
-      
-      const user = await this.userRepository.update(id, safeUpdateData);
+      // Prevent email updates
+      if (updateData.email) {
+        throw new AppError(400, 'Email cannot be updated');
+      }
+
+      // Validate name length if provided
+      if (updateData.name && (updateData.name.length < 2 || updateData.name.length > 100)) {
+        throw new AppError(400, 'Name must be between 2 and 100 characters');
+      }
+
+      const user = await this.userRepository.update(id, updateData);
       logger.info({ userId: id }, 'User updated successfully');
       return user;
     } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
       logger.error(error, 'Error updating user');
       throw new AppError(500, 'Error updating user');
     }
@@ -49,11 +59,14 @@ export class UserService {
 
   async deleteUser(id: string): Promise<void> {
     try {
-      await this.userRepository.delete(id);
-      logger.info({ userId: id }, 'User deleted successfully');
+        await this.userRepository.delete(id);
+        logger.info({ userId: id }, 'User deleted successfully');
     } catch (error) {
-      logger.error(error, 'Error deleting user');
-      throw new AppError(500, 'Error deleting user');
+        if (error instanceof AppError) {
+            throw error; // Rethrow AppError (including 404)
+        }
+        logger.error(error, 'Error deleting user');
+        throw new AppError(500, 'Error deleting user');
     }
-  }
+}
 }

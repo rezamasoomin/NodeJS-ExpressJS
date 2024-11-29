@@ -28,7 +28,6 @@ export class UpdateUserDto {
     @MaxLength(100)
     name?: string;
 
-    @IsEmail()
     email?: string;
 
     constructor(partial: Partial<UpdateUserDto> = {}) {

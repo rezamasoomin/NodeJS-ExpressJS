@@ -2,44 +2,39 @@ import { Request, Response, NextFunction } from 'express';
 import logger from '../logger';
 
 export class AppError extends Error {
-  constructor(
-    public statusCode: number,
-    public message: string,
-    public isOperational = true
-  ) {
-    super(message);
-    Object.setPrototypeOf(this, AppError.prototype);
-  }
+    constructor(
+        public statusCode: number,
+        public message: string,
+        public isOperational = true
+    ) {
+        super(message);
+        Object.setPrototypeOf(this, AppError.prototype);
+    }
 }
 
 export const errorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
+    err: Error,
+    req: Request,
+    res: Response,
+    next: NextFunction
 ) => {
-  logger.error('Error occurred:', {
-    error: err,
-    path: req.path,
-    method: req.method
-  });
-
-  if (err instanceof AppError) {
-    return res.status(err.statusCode).json({
-      status: 'error',
-      message: err.message
+    logger.error('Error occurred:', {
+        error: err,
+        path: req.path,
+        method: req.method,
+        body: req.body
     });
-  }
 
-  // Default error
-  const statusCode = 500;
-  const message = process.env.NODE_ENV === 'development' 
-    ? err.message 
-    : 'Internal server error';
+    if (err instanceof AppError) {
+        return res.status(err.statusCode).json({
+            status: 'error',
+            message: err.message
+        });
+    }
 
-  return res.status(statusCode).json({
-    status: 'error',
-    message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-  });
+    // Default error
+    return res.status(500).json({
+        status: 'error',
+        message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
 };
