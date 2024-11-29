@@ -31,16 +31,7 @@ export const errorHandler = (
     });
   }
 
-  // Check if it's a database-related error
-  if (err.name === 'QueryFailedError') {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Database operation failed',
-      detail: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
-  }
-
-  // Handle unexpected errors
+  // Default error
   const statusCode = 500;
   const message = process.env.NODE_ENV === 'development' 
     ? err.message 

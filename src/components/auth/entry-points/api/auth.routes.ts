@@ -2,7 +2,10 @@ import { Router } from 'express';
 import { AuthController } from './auth.controller';
 import { AuthService } from '../../domain/auth.service';
 import { UserRepository } from '../../../users/data-access/user.repository';
-import { validateLogin } from './auth.validation';
+import { authLimiter } from '../../../../libraries/rate-limiter';
+import { sanitizeInput } from '../../../../libraries/sanitization';
+import { validateDto } from '../../../../libraries/validation';
+import { LoginDto } from '../../domain/dtos/auth.dto';
 
 export const createAuthRouter = () => {
     const router = Router();
@@ -12,7 +15,9 @@ export const createAuthRouter = () => {
 
     router.post(
         '/login',
-        validateLogin,
+        authLimiter,
+        sanitizeInput,
+        validateDto(LoginDto),
         authController.login
     );
 

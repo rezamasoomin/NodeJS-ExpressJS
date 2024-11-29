@@ -12,16 +12,20 @@ import { createAuthRouter } from './components/auth/entry-points/api/auth.routes
 import { AuthMiddleware } from './components/auth/entry-points/api/auth.middleware';
 import { AuthService } from './components/auth/domain/auth.service';
 import { UserRepository } from './components/users/data-access/user.repository';
+import { apiLimiter } from './libraries/rate-limiter';
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
+// Security middleware
 app.use(helmet());
 app.use(cors());
 app.use(compression());
 app.use(express.json());
+
+// Global rate limiting
+app.use('/api/', apiLimiter);
 
 // Initialize Auth Middleware
 const userRepository = new UserRepository();
