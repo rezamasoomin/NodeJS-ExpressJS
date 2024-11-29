@@ -7,18 +7,32 @@ import dotenv from 'dotenv';
 import { AppDataSource } from './config/database';
 import { errorHandler } from './libraries/error-handler';
 import logger from './libraries/logger';
-import userRoutes from './components/users/entry-points/api/user.routes';
+import { createUserRouter } from './components/users/entry-points/api/user.routes';
+import { createAuthRouter } from './components/auth/entry-points/api/auth.routes';
+import { AuthMiddleware } from './components/auth/entry-points/api/auth.middleware';
+import { AuthService } from './components/auth/domain/auth.service';
+import { UserRepository } from './components/users/data-access/user.repository';
 
 dotenv.config();
 
 const app = express();
 
+// Middleware
 app.use(helmet());
 app.use(cors());
 app.use(compression());
 app.use(express.json());
 
-app.use('/api/users', userRoutes);
+// Initialize Auth Middleware
+const userRepository = new UserRepository();
+const authService = new AuthService(userRepository);
+const authMiddleware = new AuthMiddleware(authService);
+
+// Routes
+app.use('/api/auth', createAuthRouter());
+app.use('/api/users', createUserRouter(authMiddleware));
+
+// Error handling
 app.use(errorHandler);
 
 // Database initialization

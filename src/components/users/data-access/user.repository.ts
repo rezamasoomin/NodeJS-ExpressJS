@@ -20,7 +20,10 @@ export class UserRepository implements IUserRepository {
     }
 
     async findByEmail(email: string): Promise<User | null> {
-        return this.repository.findOne({ where: { email } });
+        return this.repository.findOne({ 
+            where: { email },
+            select: ['id', 'email', 'name', 'password', 'createdAt', 'updatedAt', 'isActive'] 
+        });
     }
 
     async findById(id: string): Promise<UserDTO | null> {
