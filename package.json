@@ -1,0 +1,33 @@
+{
+    "name": "nodejs-expressjs",
+    "version": "1.0.0",
+    "description": "Node.js Express.js project following best practices",
+    "main": "dist/index.js",
+    "scripts": {
+      "start": "node dist/index.js",
+      "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+      "build": "tsc",
+      "watch-ts": "tsc -w",
+      "test": "jest",
+      "lint": "eslint . --ext .ts",
+      "format": "prettier --write \"src/**/*.ts\""
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "compression": "^1.7.4",
+      "cors": "^2.8.5",
+      "dotenv": "^16.0.3",
+      "express": "^4.18.2",
+      "helmet": "^7.0.0"
+    },
+    "devDependencies": {
+      "@types/compression": "^1.7.2",
+      "@types/cors": "^2.8.13",
+      "@types/express": "^4.17.17",
+      "@types/node": "^20.1.0",
+      "ts-node-dev": "^2.0.0",
+      "typescript": "^5.0.4"
+    }
+  }
