@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import logger from '../logger';
 
 export class AppError extends Error {
   constructor(
@@ -17,6 +18,12 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  logger.error('Error occurred:', {
+    error: err,
+    path: req.path,
+    method: req.method
+  });
+
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       status: 'error',
@@ -24,10 +31,24 @@ export const errorHandler = (
     });
   }
 
+  // Check if it's a database-related error
+  if (err.name === 'QueryFailedError') {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Database operation failed',
+      detail: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+
   // Handle unexpected errors
-  console.error('Error:', err);
-  return res.status(500).json({
+  const statusCode = 500;
+  const message = process.env.NODE_ENV === 'development' 
+    ? err.message 
+    : 'Internal server error';
+
+  return res.status(statusCode).json({
     status: 'error',
-    message: 'Internal server error'
+    message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 };
