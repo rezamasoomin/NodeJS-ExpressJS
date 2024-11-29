@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Repository, DataSource, EntityNotFoundError } from 'typeorm';
 import { User } from './user.entity';
 import { IUserRepository } from '../domain/user';
 import { AppDataSource } from '../../../config/database';
@@ -8,8 +8,8 @@ import { AppError } from '../../../libraries/error-handler';
 export class UserRepository implements IUserRepository {
     private repository: Repository<User>;
 
-    constructor() {
-        this.repository = AppDataSource.getRepository(User);
+    constructor(dataSource: DataSource) {
+        this.repository = dataSource.getRepository(User);
     }
 
     async create(userData: Partial<User>): Promise<UserDTO> {
@@ -20,9 +20,9 @@ export class UserRepository implements IUserRepository {
     }
 
     async findByEmail(email: string): Promise<User | null> {
-        return this.repository.findOne({ 
+        return this.repository.findOne({
             where: { email },
-            select: ['id', 'email', 'name', 'password', 'createdAt', 'updatedAt', 'isActive'] 
+            select: ['id', 'email', 'name', 'password', 'createdAt', 'updatedAt', 'isActive']
         });
     }
 
@@ -33,20 +33,30 @@ export class UserRepository implements IUserRepository {
         return userDto as UserDTO;
     }
 
-    async update(id: string, userData: Partial<User>): Promise<UserDTO> {
-        const updateResult = await this.repository.update(id, userData);
-        if (!updateResult.affected) {
-            throw new AppError(404, 'User not found');
+    async delete(id: string): Promise<void> {
+        try {
+            const user = await this.repository.findOneOrFail({ where: { id } });
+            await this.repository.remove(user);
+        } catch (error) {
+            if (error instanceof EntityNotFoundError) {
+                throw new AppError(404, 'User not found');
+            }
+            throw error;
         }
-        const updatedUser = await this.repository.findOne({ where: { id } });
-        const { password, ...userDto } = updatedUser as User;
-        return userDto as UserDTO;
     }
 
-    async delete(id: string): Promise<void> {
-        const result = await this.repository.delete(id);
-        if (!result.affected) {
+    async update(id: string, userData: Partial<User>): Promise<UserDTO> {
+        const user = await this.repository.findOne({ where: { id } });
+        if (!user) {
             throw new AppError(404, 'User not found');
         }
+
+        const updatedUser = await this.repository.save({
+            ...user,
+            ...userData
+        });
+
+        const { password, ...userDto } = updatedUser;
+        return userDto as UserDTO;
     }
 }

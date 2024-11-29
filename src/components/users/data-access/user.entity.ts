@@ -21,9 +21,5 @@ export class User {
     updatedAt!: Date;
 
     @Column({ default: true })
-    isActive: boolean = true;
-
-    constructor(partial: Partial<User> = {}) {
-        Object.assign(this, partial);
-    }
+    isActive!: boolean;
 }

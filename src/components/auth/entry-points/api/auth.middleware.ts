@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../../domain/auth.service';
 import { AppError } from '../../../../libraries/error-handler';
+import logger from '../../../../libraries/logger';
 
 export interface AuthenticatedRequest extends Request {
     user?: {

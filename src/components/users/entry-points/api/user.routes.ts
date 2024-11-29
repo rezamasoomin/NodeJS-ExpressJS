@@ -4,13 +4,14 @@ import { UserService } from '../../domain/user.service';
 import { UserRepository } from '../../data-access/user.repository';
 import { AuthMiddleware } from '../../../auth/entry-points/api/auth.middleware';
 import { validateDto } from '../../../../libraries/validation';
+import { DataSource } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../../domain/dtos/user.dto';
 import { apiLimiter } from '../../../../libraries/rate-limiter';
 import { sanitizeInput } from '../../../../libraries/sanitization';
 
-export const createUserRouter = (authMiddleware: AuthMiddleware) => {
+export const createUserRouter = (dataSource: DataSource, authMiddleware: AuthMiddleware) => {
     const router = Router();
-    const userRepository = new UserRepository();
+    const userRepository = new UserRepository(dataSource);
     const userService = new UserService(userRepository);
     const userController = new UserController(userService);
 
