@@ -14,12 +14,12 @@ export class AuthService implements IAuthService {
     async login(credentials: LoginCredentials): Promise<LoginResponse> {
         const user = await this.userRepository.findByEmail(credentials.email);
         if (!user) {
-            throw new AppError(401, 'Invalid credentials');
+            throw new AppError(401, 'Invalid credentials-1');
         }
 
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
         if (!isPasswordValid) {
-            throw new AppError(401, 'Invalid credentials');
+            throw new AppError(401, 'Invalid credentials-2');
         }
 
         const token = jwt.sign(
