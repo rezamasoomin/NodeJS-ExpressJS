@@ -18,7 +18,7 @@ export const apiLimiter = isTest
 
 // More strict limiter for auth endpoints
 export const authLimiter = isTest
-    ? (req: any, res: any, next: any) => next()
+    ? (req: any, res: Response, next: any) => next()
     : rateLimit({
         windowMs: 60 * 60 * 1000, // 1 hour
         max: 5, // Limit each IP to 5 login requests per hour

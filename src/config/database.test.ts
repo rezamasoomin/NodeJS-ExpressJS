@@ -1,26 +1,21 @@
 import { DataSource } from "typeorm";
 import { User } from "../components/users/data-access/user.entity";
-import "reflect-metadata";
+import { Post } from "../components/posts/data-access/post.entity";
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load test environment variables
+dotenv.config({ path: path.join(__dirname, '../../.env.test') });
 
 export const TestDataSource = new DataSource({
-    name: "test",
-    type: "sqlite",
-    database: ":memory:",
-    entities: [User],
-    synchronize: true,
-    logging: false,
-    dropSchema: true
+    type: "mysql",
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT || "3306"),
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.TEST_DB_NAME, // Use test database
+    entities: [User, Post],
+    synchronize: true, // Auto-sync for test database
+    dropSchema: true, // Drop schema for clean tests
+    logging: false
 });
-
-export const initializeTestDatabase = async () => {
-    try {
-        if (!TestDataSource.isInitialized) {
-            await TestDataSource.initialize();
-            console.log("Test database initialized");
-        }
-        return TestDataSource;
-    } catch (error) {
-        console.error("Error initializing test database:", error);
-        throw error;
-    }
-};

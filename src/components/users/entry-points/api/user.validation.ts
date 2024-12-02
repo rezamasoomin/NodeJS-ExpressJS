@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, NextFunction } from 'express';
 import { z } from 'zod';
 import { AppError } from '../../../../libraries/error-handler';
 
@@ -10,7 +10,6 @@ const userCreationSchema = z.object({
 
 export const validateUserCreation = async (
     req: Request,
-    res: Response,
     next: NextFunction
 ) => {
     try {

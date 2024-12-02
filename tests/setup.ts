@@ -1,21 +1,32 @@
 import { beforeAll, afterAll, beforeEach } from '@jest/globals';
-import { initializeTestDatabase, TestDataSource } from '../src/config/database.test';
-import "reflect-metadata";
+import { TestDataSource } from '../src/config/database.test';
 
 beforeAll(async () => {
-    await initializeTestDatabase();
+    try {
+        await TestDataSource.initialize();
+        console.log("Test database initialized");
+    } catch (error) {
+        console.error("Error initializing test database:", error);
+        throw error;
+    }
 });
 
 beforeEach(async () => {
-    // Clear all tables
     try {
+        // Clear data in correct order due to foreign key constraints
         const entities = TestDataSource.entityMetadatas;
-        for (const entity of entities) {
+        // Sort entities to handle foreign key dependencies
+        const sortedEntities = entities.sort((a, b) => 
+            b.foreignKeys.length - a.foreignKeys.length
+        );
+
+        for (const entity of sortedEntities) {
             const repository = TestDataSource.getRepository(entity.name);
-            await repository.clear();
+            await repository.delete({});
         }
     } catch (error) {
-        console.error('Error clearing test data:', error);
+        console.error("Error clearing test data:", error);
+        throw error;
     }
 });
 
