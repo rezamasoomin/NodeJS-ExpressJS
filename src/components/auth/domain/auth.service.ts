@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import { IUserRepository } from '../../users/domain/user';
 import { LoginCredentials, AuthTokenPayload, LoginResponse, IAuthService } from './auth.types';
 import { AppError } from '../../../libraries/error-handler';
-import logger from '../../../libraries/logger';
 import { User } from '../../users/data-access/user.entity';
 
 export class AuthService implements IAuthService {

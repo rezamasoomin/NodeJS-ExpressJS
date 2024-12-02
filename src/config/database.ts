@@ -1,19 +1,31 @@
-import { DataSource } from "typeorm";
-import { User } from "../components/users/data-access/user.entity";
-import dotenv from 'dotenv';
+import { DataSource, DataSourceOptions } from 'typeorm';
+import env from './env';
+import path from 'path';
 
-dotenv.config();
+const baseConfig: DataSourceOptions = {
+  type: 'mysql',
+  host: env.DB_HOST,
+  port: env.DB_PORT,
+  username: env.DB_USERNAME,
+  password: env.DB_PASSWORD,
+  database: env.DB_NAME,
+  entities: [path.join(__dirname, '../components/**/data-access/*.entity{.ts,.js}')],
+  migrations: [path.join(__dirname, '../migrations/*{.ts,.js}')],
+  logging: env.NODE_ENV === 'development',
+  synchronize: false, // Never true in production
+};
 
-export const AppDataSource = new DataSource({
-  type: "mysql",
-  host: process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_PORT || "3306"),
-  username: process.env.DB_USERNAME || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "nodejs_best_practices",
-  synchronize: process.env.NODE_ENV === "development", // Don't use in production
-  logging: process.env.NODE_ENV === "development",
-  entities: [User],
-  migrations: ["src/migrations/*.ts"],
-  subscribers: [],
-});
+const AppDataSource = new DataSource(baseConfig);
+
+export const initializeDatabase = async () => {
+  try {
+    await AppDataSource.initialize();
+    console.log('Database initialized successfully');
+    return AppDataSource;
+  } catch (error) {
+    console.error('Error initializing database:', error);
+    throw error;
+  }
+};
+
+export default AppDataSource;

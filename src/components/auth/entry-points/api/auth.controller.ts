@@ -4,7 +4,7 @@ import { AuthService } from '../../domain/auth.service';
 import logger from '../../../../libraries/logger';
 
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService) { }
 
     validateLogin = [
         body('email').isEmail().withMessage('Invalid email'),
@@ -19,10 +19,11 @@ export class AuthController {
             }
 
             const { token, user } = await this.authService.login(req.body);
-            res.json({ token, user });
+            return res.json({ token, user });
         } catch (error) {
             logger.error(error, 'Login error');
             next(error);
+            return;
         }
     };
 }

@@ -19,6 +19,7 @@ export const createAuthRouter = (dataSource: DataSource) => {
         '/login',
         authLimiter,
         sanitizeInput,
+        validateLogin,
         validateDto(LoginDto),
         authController.login
     );

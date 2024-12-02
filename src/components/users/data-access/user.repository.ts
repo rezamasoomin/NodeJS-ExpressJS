@@ -1,7 +1,6 @@
 import { Repository, DataSource, EntityNotFoundError } from 'typeorm';
 import { User } from './user.entity';
 import { IUserRepository } from '../domain/user';
-import { AppDataSource } from '../../../config/database';
 import { UserDTO } from '../domain/user';
 import { AppError } from '../../../libraries/error-handler';
 

@@ -27,7 +27,7 @@ export class UserController {
       }
       
       logger.error('Error in createUser controller:', error);
-      next(error);
+      return next(error);
     }
   };
 
