@@ -4,6 +4,7 @@ import { createTestApp } from '../../test-server';
 import { TestDataSource } from '../../../src/config/database.test';
 import { User } from '../../../src/components/users/data-access/user.entity';
 import bcrypt from 'bcrypt';
+import { TestHelper } from '../../helpers/auth.helper';
 
 let app: any;
 let testUser: User;
@@ -15,24 +16,10 @@ beforeAll(async () => {
 
 beforeEach(async () => {
     // Create test user
-    const userRepository = TestDataSource.getRepository(User);
-    const hashedPassword = await bcrypt.hash('TestPass123!', 10);
-    const user = userRepository.create({
-        name: 'Test User',
-        email: 'test@test.com',
-        password: hashedPassword,
-        isActive: true
-    });
-    testUser = await userRepository.save(user);
+    testUser = await TestHelper.createTestUser('test@test.com');
 
     // Get auth token
-    const loginResponse = await request(app)
-        .post('/api/auth/login')
-        .send({
-            email: 'test@test.com',
-            password: 'TestPass123!'
-        });
-    authToken = loginResponse.body.token;
+    authToken = TestHelper.generateTestToken(testUser);
 });
 
 describe('User API Tests', () => {

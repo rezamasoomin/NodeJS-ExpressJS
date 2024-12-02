@@ -5,6 +5,7 @@ import { TestDataSource } from '../../../src/config/database.test';
 import { TestHelper } from '../../helpers/auth.helper';
 import { User } from '../../../src/components/users/data-access/user.entity';
 import { Post } from '../../../src/components/posts/data-access/post.entity';
+import bcrypt from 'bcrypt';
 
 describe('Post API Tests', () => {
     let app: any;
@@ -12,24 +13,19 @@ describe('Post API Tests', () => {
     let authToken: string;
     let testPost: Post;
 
-    beforeEach(async () => {
+
+    beforeAll(async () => {
         app = await createTestApp();
-
+    });
+    beforeEach(async () => {
         // Create test user
-        const userRepository = TestDataSource.getRepository(User);
-        testUser = await TestHelper.createTestUser();
-        
-        // Get auth token
-        const loginResponse = await request(app)
-            .post('/api/auth/login')
-            .send({
-                email: 'test@test.com',
-                password: 'TestPass123!'
-            });
-        
-        authToken = loginResponse.body.token;
+      // Create test user
+      testUser = await TestHelper.createTestUser('test@test.com');
 
-        // Create test post
+      // Get auth token
+      authToken = TestHelper.generateTestToken(testUser);
+
+        // Create a test post
         const postRepository = TestDataSource.getRepository(Post);
         testPost = await postRepository.save({
             title: 'Test Post',
@@ -132,11 +128,12 @@ describe('Post API Tests', () => {
         it('should prevent updating post by non-owner', async () => {
             // Create another user
             const anotherUser = await TestHelper.createTestUser('another@test.com');
-            const anotherToken = await TestHelper.generateTestToken(anotherUser);
+            // Get auth token
+            authToken = TestHelper.generateTestToken(anotherUser);
 
             const response = await request(app)
                 .put(`/api/posts/${testPost.id}`)
-                .set('Authorization', `Bearer ${anotherToken}`)
+                .set('Authorization', `Bearer ${authToken}`)
                 .send({
                     title: 'Updated Title'
                 });
@@ -162,11 +159,11 @@ describe('Post API Tests', () => {
         it('should prevent deleting post by non-owner', async () => {
             // Create another user
             const anotherUser = await TestHelper.createTestUser('another@test.com');
-            const anotherToken = await TestHelper.generateTestToken(anotherUser);
-
+            // Get auth token
+            authToken = TestHelper.generateTestToken(anotherUser);
             const response = await request(app)
                 .delete(`/api/posts/${testPost.id}`)
-                .set('Authorization', `Bearer ${anotherToken}`);
+                .set('Authorization', `Bearer ${authToken}`);
 
             expect(response.status).toBe(403);
         });

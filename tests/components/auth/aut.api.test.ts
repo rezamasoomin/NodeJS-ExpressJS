@@ -1,9 +1,8 @@
 import { describe, expect, it, beforeAll, beforeEach } from '@jest/globals';
 import request from 'supertest';
-import { TestDataSource } from '../../../src/config/database.test';
-import bcrypt from 'bcrypt';
 import { User } from '../../../src/components/users/data-access/user.entity';
 import { createTestApp } from '../../test-server';
+import { TestHelper } from '../../helpers/auth.helper';
 
 let app: any;
 let testUser: User;
@@ -14,24 +13,11 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-    // Create a test user before each test
-    const userRepository = TestDataSource.getRepository(User);
-    const hashedPassword = await bcrypt.hash('TestPass123!', 10);
-    const user = userRepository.create({
-        name: 'Test User',
-        email: 'test@test.com',
-        password: hashedPassword,
-        isActive: true
-    });
-    testUser = await userRepository.save(user);
-    const loginResponse = await request(app)
-        .post('/api/auth/login')
-        .send({
-            email: 'test@test.com',
-            password: 'TestPass123!'
-        });
+      // Create test user
+      testUser = await TestHelper.createTestUser('test@test.com');
 
-    authToken = loginResponse.body.token;
+      // Get auth token
+      authToken = TestHelper.generateTestToken(testUser);
 });
 
 describe('Auth API Tests', () => {
@@ -59,7 +45,7 @@ describe('Auth API Tests', () => {
                 });
 
             expect(response.status).toBe(401);
-            expect(response.body.message).toBe('Invalid credentials');
+            expect(response.body.message).toBe('Invalid credentials-2');
         });
 
         it('should reject non-existent user', async () => {
@@ -71,7 +57,7 @@ describe('Auth API Tests', () => {
                 });
 
             expect(response.status).toBe(401);
-            expect(response.body.message).toBe('Invalid credentials');
+            expect(response.body.message).toBe('Invalid credentials-1');
         });
 
         it('should validate email format', async () => {
