@@ -15,7 +15,6 @@ beforeEach(async () => {
     try {
         // Clear data in correct order due to foreign key constraints
         const entities = TestDataSource.entityMetadatas;
-        // Sort entities to handle foreign key dependencies
         const sortedEntities = entities.sort((a, b) => 
             b.foreignKeys.length - a.foreignKeys.length
         );
