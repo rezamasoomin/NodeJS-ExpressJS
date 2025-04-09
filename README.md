@@ -57,7 +57,7 @@ project-root/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/nodejs-best-practices.git
+git clone https://github.com/rezamasoomin/nodejs-best-practices.git
 ```
 
 2. Install dependencies:
